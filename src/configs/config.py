@@ -21,13 +21,13 @@ CFG = {
         "n_rows": None
     },
     "tune": {
-        "tuning": True,
+        "tuning": False,
         "max_evals": 50
     },
     "train": {
         "seq_time_steps": 6,
         "batch_size": 25,
-        "epochs": 100,
+        "epochs": 10,
         "val_subsplits": 0.1,
         "units": [102, 102],
         "dropout_rate": [0.2, 0.2],
