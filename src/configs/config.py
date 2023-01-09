@@ -44,7 +44,7 @@ CFG = {
     },
     "mlflow_config": {
         "enabled": True,
-        "experiment_name": "teaching-ADLM-v2",
+        "experiment_name": "teaching-ADLM-v4",
         "tags": {"train_data": "normal"},
     },
     "inference": {
