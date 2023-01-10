@@ -25,7 +25,7 @@ CFG = {
         "max_evals": 50
     },
     "train": {
-        "seq_time_steps": 6,
+        "seq_time_steps": 12,
         "batch_size": 25,
         "epochs": 100,
         "val_subsplits": 0.1,
