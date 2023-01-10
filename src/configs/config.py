@@ -27,7 +27,7 @@ CFG = {
     "train": {
         "seq_time_steps": 12,
         "batch_size": 25,
-        "epochs": 100,
+        "epochs": 150,
         "val_subsplits": 0.1,
         "units": [102, 102],
         "dropout_rate": [0.2, 0.2],
