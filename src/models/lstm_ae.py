@@ -85,16 +85,19 @@ class LSTMAutoencoder(BaseModel):
         """Loads and Preprocess data """
         columns = self.features + self.ground_truth_cols
         dict_data_types = (dict(zip(self.features, self.data_types)) if self.data_types else None)
+
+        # Verification data will be used for testing unseen data
         self.normal, self.anomaly, self.verification = DataLoader().load_data(columns, self.config.data,
                                                                               dict_data_types, self.n_rows,
                                                                               mode='train')
 
         # If there are ground truth columns, remove and store them
         if self.ground_truth_cols is not None:
-            self.normal_y = self.normal.loc[:,
-                            self.ground_truth_cols]  # only keep label as ground truth col, skip attack_cat
+            # y labels
+            self.normal_y = self.normal.loc[:, self.ground_truth_cols]  # only keep label as ground truth col, skip attack_cat
             self.anomaly_y = self.anomaly.loc[:, self.ground_truth_cols]
             self.verification_y = self.verification.loc[:, self.ground_truth_cols]
+            # X features
             self.normal = self.normal.loc[:, self.features]
             self.anomaly = self.anomaly.loc[:, self.features]
             self.verification = self.verification.loc[:, self.features]
@@ -104,7 +107,7 @@ class LSTMAutoencoder(BaseModel):
     def _preprocess_data(self):
         """ Splits into training and obs and set training parameters"""
 
-        # Fit transformer to the concatenated data
+        # Fit a transformer to the concatenated data that will be used for training, tuning and validation
         self.total = pd.concat([self.normal, self.anomaly])
         self.transformer = main_transformer(self.total)
 
@@ -113,21 +116,21 @@ class LSTMAutoencoder(BaseModel):
         self.anomaly = transform_df(self.anomaly, self.transformer)
         self.verification = transform_df(self.verification, self.transformer)
 
-        # Create sequences: normal feats transformed
-        self.normal_seq = create_sequences(self.normal, self.seq_time_steps)
-        print("Normal data input shape (#seqs, seq len, feats): ", self.normal_seq.shape)
+        # Create sequences: normal feats X transformed
+        self.normal_x_seq = create_sequences(self.normal, self.seq_time_steps)
+        print("Normal data input shape (#seqs, seq len, feats): ", self.normal_x_seq.shape)
 
-        # Create sequences: anomaly feats transformed
-        self.anomaly_seq = create_sequences(self.anomaly, self.seq_time_steps)
-        print("Anomaly data input shape: ", self.anomaly_seq.shape)
+        # Create sequences: anomaly feats X transformed
+        self.anomaly_x_seq = create_sequences(self.anomaly, self.seq_time_steps)
+        print("Anomaly data input shape: ", self.anomaly_x_seq.shape)
 
-        # Create sequences: verification feats transformed
+        # Create sequences: verification feats X transformed
         self.verification_x_seq = create_sequences(self.verification, self.seq_time_steps)
         print("Verification data input shape: ", self.verification_x_seq.shape)
 
         # Create sequences: normal y
         self.normal_y_seq = create_sequences(self.normal_y, self.seq_time_steps)
-        print("Normal target shape (#seqs, seq len", self.normal_y_seq.shape)
+        print("Normal target shape (#seqs, seq len): ", self.normal_y_seq.shape)
 
         # Create sequences: anomaly y
         self.anomaly_y_seq = create_sequences(self.anomaly_y, self.seq_time_steps)
@@ -140,17 +143,18 @@ class LSTMAutoencoder(BaseModel):
         self._split_subsets()
 
     def _split_subsets(self):
-        n_seq_num = self.normal_seq.shape[0] // 4
-        a_seq_num = self.anomaly_seq.shape[0] // 2
+        n_seq_num = self.normal_x_seq.shape[0] // 4
+        a_seq_num = self.anomaly_x_seq.shape[0] // 2
 
         # Input X
-        self.norm_train_x_seq = self.normal_seq[:n_seq_num, :, :]  # train
-        self.norm_val_x_seq = self.normal_seq[n_seq_num:2 * n_seq_num, :, :]  # hyperopt
-        self.norm_mahal_x_seq = self.normal_seq[2 * n_seq_num:3 * n_seq_num, :, :]  # mu and sigma
-        self.norm_thres_x_seq = self.normal_seq[3 * n_seq_num:, :, :]  # threshold
+        self.norm_train_x_seq = self.normal_x_seq[:n_seq_num, :, :]  #  normal train (Malhotra: s_N)
+        self.norm_val_x_seq = self.normal_x_seq[n_seq_num:2 * n_seq_num, :, :]  # normal validation-1 (Malhotra: v_N1), hyperopt, early stopping
+        self.norm_mahal_x_seq = self.normal_x_seq[2 * n_seq_num:3 * n_seq_num, :, :]  # normal validation-1 (Malhotra: v_N1),  mahalanobis params
+        self.norm_thres_x_seq = self.normal_x_seq[3 * n_seq_num:, :, :]  # normal validation-2 (Malhotra: v_N2), threshold
+        # normal test(Malhotra: tN)
 
-        self.anom_thres_x_seq = self.anomaly_seq[:a_seq_num, :, :]  # threshold
-        self.anom_val_x_seq = self.anomaly_seq[a_seq_num:, :, :]  # testing
+        self.anom_thres_x_seq = self.anomaly_x_seq[:a_seq_num, :, :]  # anomalous validation (Malhotra: vA), threshold
+        self.anom_val_x_seq = self.anomaly_x_seq[a_seq_num:, :, :]  # anomalous test (Malhotra: tA), testing
 
         # Label
         self.norm_train_y_seq = self.normal_y_seq[:n_seq_num, :]

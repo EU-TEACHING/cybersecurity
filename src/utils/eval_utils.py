@@ -51,17 +51,44 @@ def compute_threshold(normal_scores, anomaly_scores):
 
 def compute_mahalanobis(reconstruction_error, mean, cov, time_steps):
     """Compute mahalanobis distance."""
-    temp_reshape = reconstruction_error.reshape(-1, reconstruction_error.shape[-1]) # shape: (seq*timesteps, n_feat)
+    # Reshape the reconstruction error from 3D (#sequences, sequence_length, #features) to 2D (#sequences * sequence_length, #features)
+    reshaped_error = reconstruction_error.reshape(-1, reconstruction_error.shape[-1])  # shape: (seq*timesteps, n_feat)
     return np.mean(
-        np.array([distance.mahalanobis(mean, temp_reshape[i], cov) for i in range(len(temp_reshape))]).reshape(-1,
-                                                                                                               time_steps),
+        np.array([distance.mahalanobis(mean, reshaped_error[i], cov) for i in range(len(reshaped_error))]).reshape(-1,
+                                                                                                                   time_steps),
         axis=1)
 
 
+def compute_mahalanobis_(reconstruction_error, mean, cov, time_steps):
+    """Compute Mahalanobis distance."""
+
+    # Reshape the reconstruction error from 3D (#sequences, sequence_length, #features) to 2D (#sequences * sequence_length, #features)
+    reshaped_error = reconstruction_error.reshape(-1, reconstruction_error.shape[-1])
+
+    # Compute the Mahalanobis distance
+    inv_cov = np.linalg.inv(cov)
+    mahalanobis_dist = []
+    for i in range(0, reshaped_error.shape[0], time_steps):
+        error_slice = reshaped_error[i:i+time_steps]
+        diff = error_slice - mean
+        dist = np.sqrt(np.sum(np.dot(diff, inv_cov) * diff, axis=1))
+        mahalanobis_dist.extend(dist)
+
+    return np.array(mahalanobis_dist)
+
+# Test the compute_mahalanobis function
+reconstruction_error = np.random.randn(100, 4, 10)  # Example reconstruction error array
+mean = np.random.randn(10)  # Example mean array
+cov = np.eye(10)  # Example covariance matrix
+time_steps = 4  # Example number of time steps
+
+distances = compute_mahalanobis(reconstruction_error, mean, cov, time_steps)
+print(distances)
+
 def anomaly_scoring(model, data_seq, time_steps, cov, mean):
     """Compute anomaly scores, find anomalies and return the anomalous data indices and the threshold."""
-    reconstruction_error = model.predict(data_seq) - data_seq # same shape with data_seq i.e., (n_seq,timesteps,n_feat)
-    anomaly_scores = compute_mahalanobis(reconstruction_error, mean, cov, time_steps) # shape: (n_seq,)
+    reconstruction_error = model.predict(data_seq) - data_seq  # same shape with data_seq i.e., (n_seq,timesteps,n_feat)
+    anomaly_scores = compute_mahalanobis(reconstruction_error, mean, cov, time_steps)  # shape: (n_seq,)
     return anomaly_scores
 
 
@@ -69,7 +96,7 @@ def get_anomalies(model, data_seq, threshold, time_steps, cov, mean):
     """Create a list of the anomalous data indices."""
     anomaly_scores = anomaly_scoring(model, data_seq, time_steps, cov, mean)  # shape: (n_seq,)
     # Detect all the samples which are anomalies.
-    anomalies = anomaly_scores > threshold # boolean, shape (n_seq,)
+    anomalies = anomaly_scores > threshold  # boolean, shape (n_seq,)
     # data i is an anomaly if samples [(i - timesteps + 1) to (i)] are anomalies
     anomalous_data_indices = []
     # for data_idx in range(time_steps - 1, len(data_seq) - time_steps + 1):
