@@ -9,7 +9,7 @@ def mlflow_config(mlflow_cfg):
     experiment_name = mlflow_cfg["experiment_name"]
     experiment_id = retrieve_mlflow_experiment_id(experiment_name, create=True)
 
-    return mlflow.start_run(experiment_id=experiment_id, tags=tags)
+    return mlflow.start_run(experiment_id=experiment_id)
 
 
 def retrieve_mlflow_experiment_id(name, create=False):

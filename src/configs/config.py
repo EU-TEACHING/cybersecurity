@@ -21,13 +21,13 @@ CFG = {
         "n_rows": None
     },
     "tune": {
-        "tuning": True,
+        "tuning": False,
         "max_evals": 50
     },
     "train": {
         "seq_time_steps": 4,
         "batch_size": 25,
-        "epochs": 70,
+        "epochs": 7,
         "val_subsplits": 0.1,
         "units": [102, 102],
         "dropout_rate": [0.2, 0.2],
@@ -43,7 +43,7 @@ CFG = {
         "scores": "mahalanobis"  # mae_loss or mahalanobis
     },
     "mlflow_config": {
-        "enabled": True,
+        "enabled": False,
         "experiment_name": "teaching-ADLM-v4",
         "tags": {"train_data": "normal"},
     },
