@@ -11,7 +11,7 @@ import mlflow
 
 # internal
 from src.configs.config import CFG
-from src.models.lstm_ae import LSTMAutoencoder
+from src.models.lstm_ae_extra import LSTMAutoencoder
 from src.inference.inferrer import Inferrer
 from src.utils.logging_utils import mlflow_config
 
@@ -31,25 +31,26 @@ def run_training():
         mlflow_run = mlflow_config(CFG["mlflow_config"])
 
     model = LSTMAutoencoder(CFG)
-
-    load_start = time.time()
-    model.load_data()
-    print(f'Data load runtime: {time.time() - load_start}')
-
-    model.build()
-
-    train_start = time.time()
-    model.train()
-    model.eval()
-    print(f'Train, eval runtime: {time.time() - train_start}')
-
-    if with_mlflow:
-        # Saves model and writes logs to mlflow
-        log_start = time.time()
-        model.save_model()
-        print(f'MLflow logging time: {time.time() - log_start}')
-    else:
-        model.save_model()
+    model.run_train()
+    #
+    # load_start = time.time()
+    # model.load_data()
+    # print(f'Data load runtime: {time.time() - load_start}')
+    #
+    # model.build()
+    #
+    # train_start = time.time()
+    # model.train()
+    # model.eval()
+    # print(f'Train, eval runtime: {time.time() - train_start}')
+    #
+    # if with_mlflow:
+    #     # Saves model and writes logs to mlflow
+    #     log_start = time.time()
+    #     model.save_model()
+    #     print(f'MLflow logging time: {time.time() - log_start}')
+    # else:
+    #     model.save_model()
 
     if mlflow.active_run():
         mlflow.end_run()

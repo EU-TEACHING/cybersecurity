@@ -9,10 +9,12 @@ CFG = {
         "verification_set": "data/verification/UNSW-NB15_1.csv",
         "ground_truth_cols": ['label'],  # a list with names of columns or None
         "features": ["dur", "proto", "service", "state", "spkts", "dpkts", "sbytes", "dbytes", "sttl", "dttl",
-                    "sload", "dload", "sloss", "dloss", "sinpkt", "dinpkt", "sjit", "djit", "swin", "stcpb", "dtcpb",
-                    "dwin", "tcprtt", "synack", "ackdat", "smean", "dmean", "trans_depth", "response_body_len", "ct_srv_src",
-                    "ct_state_ttl", "ct_dst_ltm", "ct_src_dport_ltm", "ct_dst_sport_ltm", "ct_dst_src_ltm", "is_ftp_login",
-                    "ct_ftp_cmd", "ct_flw_http_mthd", "ct_src_ltm", "ct_srv_dst", "is_sm_ips_ports"],
+                     "sload", "dload", "sloss", "dloss", "sinpkt", "dinpkt", "sjit", "djit", "swin", "stcpb", "dtcpb",
+                     "dwin", "tcprtt", "synack", "ackdat", "smean", "dmean", "trans_depth", "response_body_len",
+                     "ct_srv_src",
+                     "ct_state_ttl", "ct_dst_ltm", "ct_src_dport_ltm", "ct_dst_sport_ltm", "ct_dst_src_ltm",
+                     "is_ftp_login",
+                     "ct_ftp_cmd", "ct_flw_http_mthd", "ct_src_ltm", "ct_srv_dst", "is_sm_ips_ports"],
         "data_types": ["Float32", "category", "category", "category", "Int64", "Int64", "Int64", "Int64",
                        "Int64", "Int64", "Float32", "Float32", "Int64", "Int64", "Float32", "Float32",
                        "Float32", "Float32", "Int64", "Int64", "Int64", "Int64", "Float32", "Float32", "Float32",
@@ -22,11 +24,23 @@ CFG = {
     },
     "tune": {
         "tuning": False,
-        "max_evals": 50
+        "max_evals": 5
     },
     "train": {
+        "hyperparams": {
+            "encoder_layers": 2,
+            "decoder_layers": 2,
+            "encoder_units": (100, 50),
+            "decoder_units": (50, 100),
+            "learning_rate": 0.0032265,
+            "dropout_rate": 0.2,
+            "batch_size": 25,
+            "epochs": 7,
+            "activation": "tanh",
+            "regularization": None
+        },
         "seq_time_steps": 4,
-        "batch_size": 25,
+        "batch_size": 2,
         "epochs": 7,
         "val_subsplits": 0.1,
         "units": [102, 102],

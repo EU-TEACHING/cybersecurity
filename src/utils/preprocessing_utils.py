@@ -8,6 +8,15 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
 
+class DictToObject:
+    def __init__(self, dictionary):
+        for key, value in dictionary.items():
+            if isinstance(value, dict):
+                setattr(self, key, DictToObject(value))
+            else:
+                setattr(self, key, value)
+
+
 def features_to_float(df):
     """Turn all columns of the dataframe to type float32 and reset index."""
     df = df.astype('float32')

@@ -15,11 +15,11 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def build(self):
+    def build(self, hyperparams):
         pass
 
     @abstractmethod
-    def train(self):
+    def train(self, hyperparams):
         pass
 
     @abstractmethod

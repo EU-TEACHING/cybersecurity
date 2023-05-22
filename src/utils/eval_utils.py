@@ -76,14 +76,14 @@ def compute_mahalanobis_(reconstruction_error, mean, cov, time_steps):
 
     return np.array(mahalanobis_dist)
 
-# Test the compute_mahalanobis function
-reconstruction_error = np.random.randn(100, 4, 10)  # Example reconstruction error array
-mean = np.random.randn(10)  # Example mean array
-cov = np.eye(10)  # Example covariance matrix
-time_steps = 4  # Example number of time steps
-
-distances = compute_mahalanobis(reconstruction_error, mean, cov, time_steps)
-print(distances)
+# # Test the compute_mahalanobis function
+# reconstruction_error = np.random.randn(100, 4, 10)  # Example reconstruction error array
+# mean = np.random.randn(10)  # Example mean array
+# cov = np.eye(10)  # Example covariance matrix
+# time_steps = 4  # Example number of time steps
+#
+# distances = compute_mahalanobis(reconstruction_error, mean, cov, time_steps)
+# print(distances)
 
 def anomaly_scoring(model, data_seq, time_steps, cov, mean):
     """Compute anomaly scores, find anomalies and return the anomalous data indices and the threshold."""
