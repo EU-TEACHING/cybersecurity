@@ -5,7 +5,6 @@ from mlflow_env_vars import mlflow_connect
 
 def mlflow_config(mlflow_cfg):
     mlflow_connect()
-    tags = mlflow_cfg["tags"]
     experiment_name = mlflow_cfg["experiment_name"]
     experiment_id = retrieve_mlflow_experiment_id(experiment_name, create=True)
 

@@ -33,7 +33,7 @@ model_spaces = {
         'encoder_units': [scope.int(hp.quniform(f'encoder_units_{i}', 50, 150, 10)) for i in range(1, 3)],
         'decoder_units': [scope.int(hp.quniform(f'decoder_units_{i}', 50, 150, 10)) for i in range(1, 3)],
         'batch_size': scope.int(hp.quniform('batch_size', 16, 128, 16)),
-        'epochs': scope.int(hp.quniform('epochs', 5, 55, 50)),
+        'epochs': scope.int(hp.quniform('epochs', 1, 6, 1)),
         'dropout_rate': hp.uniform('dropout_rate', 0.0, 0.5),
         'activation': hp.choice('activation', ['relu', 'tanh']),
         'regularization': hp.choice('regularization', [None, 'l1', 'l2'])

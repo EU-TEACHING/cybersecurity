@@ -3,6 +3,7 @@
 
 # standard
 import argparse
+import os
 import time
 import logging
 
@@ -89,4 +90,3 @@ if __name__ == '__main__':
         run_training()
     elif exec_mode == 'infer':
         run_inference()
-

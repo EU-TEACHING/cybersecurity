@@ -22,10 +22,6 @@ CFG = {
                        "category", "Int64", "Int64", "Int64", "Int64", "category"],
         "n_rows": None
     },
-    "tune": {
-        "tuning": False,
-        "max_evals": 5
-    },
     "train": {
         "hyperparams": {
             "encoder_layers": 2,
@@ -35,31 +31,25 @@ CFG = {
             "learning_rate": 0.0032265,
             "dropout_rate": 0.2,
             "batch_size": 25,
-            "epochs": 7,
+            "epochs": 2,
             "activation": "tanh",
             "regularization": None
         },
-        "seq_time_steps": 4,
-        "batch_size": 2,
-        "epochs": 7,
-        "val_subsplits": 0.1,
-        "units": [102, 102],
-        "dropout_rate": [0.2, 0.2],
-        "loss": "mse",
-        "early_stopping_rounds": 5,
-        "learning_rate": 0.0032265
+        "train_setup": {
+            "seq_time_steps": 4,
+            "early_stopping_rounds": 5,
+            "tuning": True,
+            "tuning_max_evals": 5,
+            "hp_space": "lstm-ae-extra"
+        }
     },
     "model": {
         "model_name": "LSTM-AE",
         "storage": "local_model_storage"
     },
-    "anomaly_scoring": {
-        "scores": "mahalanobis"  # mae_loss or mahalanobis
-    },
     "mlflow_config": {
-        "enabled": False,
-        "experiment_name": "teaching-ADLM-v4",
-        "tags": {"train_data": "normal"},
+        "enabled": True,
+        "experiment_name": "teaching-ADLM-v5",
     },
     "inference": {
         "data_path": "data/verification/UNSW-NB15_1.csv",

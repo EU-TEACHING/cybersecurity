@@ -8,6 +8,28 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
 
+# from pydantic import BaseModel, validator, constr, conint, Tuple
+
+
+# class HyperParams(BaseModel):
+#     activation: str
+#     batch_size: conint(ge=1)
+#     decoder_layers: conint(ge=1)
+#     decoder_units: Tuple[int, int]
+#     dropout_rate: float
+#     encoder_layers: conint(ge=1)
+#     encoder_units: Tuple[int, int]
+#     epochs: conint(ge=1)
+#     learning_rate: float
+#     regularization: constr(regex='^(l1|l2)$')
+#
+#     @validator('dropout_rate', 'learning_rate')
+#     def validate_rate(cls, rate):
+#         if rate <= 0 or rate >= 1:
+#             raise ValueError("Rate must be between 0 and 1.")
+#         return rate
+
+
 class DictToObject:
     def __init__(self, dictionary):
         for key, value in dictionary.items():
@@ -15,6 +37,20 @@ class DictToObject:
                 setattr(self, key, DictToObject(value))
             else:
                 setattr(self, key, value)
+
+
+def split_dataset(dataset, percentages):
+    subsets = []
+    start_idx = 0
+    total_samples = dataset.shape[0]
+
+    for percent in percentages:
+        end_idx = start_idx + int(percent * total_samples)
+        subset = dataset[start_idx:end_idx, :, :]
+        subsets.append(subset)
+        start_idx = end_idx
+
+    return tuple(subsets)
 
 
 def features_to_float(df):
