@@ -20,7 +20,9 @@ CFG = {
                        "Float32", "Float32", "Int64", "Int64", "Int64", "Int64", "Float32", "Float32", "Float32",
                        "Int64", "Int64", "Int64", "Int64", "Int64", "Int64", "Int64", "Int64", "Int64", "Int64",
                        "category", "Int64", "Int64", "Int64", "Int64", "category"],
-        "n_rows": None
+        "n_rows": None,
+        "normal_splits_pc": [0.7, 0.1, 0.1, 0.1],
+        "anomaly_splits_pc": [0.5, 0.5]
     },
     "train": {
         "hyperparams": {
@@ -31,21 +33,21 @@ CFG = {
             "learning_rate": 0.0032265,
             "dropout_rate": 0.2,
             "batch_size": 25,
-            "epochs": 2,
+            "epochs": 150,
             "activation": "tanh",
             "regularization": None
         },
         "train_setup": {
             "seq_time_steps": 4,
             "early_stopping_rounds": 5,
-            "tuning": True,
+            "tuning": False,
             "tuning_max_evals": 5,
             "hp_space": "lstm-ae-extra"
         }
     },
     "model": {
         "model_name": "LSTM-AE",
-        "storage": "local_model_storage"
+        "storage_path": "local_model_storage"
     },
     "mlflow_config": {
         "enabled": True,

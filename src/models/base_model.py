@@ -11,17 +11,17 @@ class BaseModel(ABC):
         self.config = Config.from_json(cfg)
 
     @abstractmethod
-    def load_data(self):
+    def _load_data(self):
         pass
 
     @abstractmethod
-    def build(self, hyperparams):
+    def _build(self, hyperparams):
         pass
 
     @abstractmethod
-    def train(self, hyperparams):
+    def _train(self, hyperparams):
         pass
 
     @abstractmethod
-    def eval(self):
+    def _eval(self):
         pass

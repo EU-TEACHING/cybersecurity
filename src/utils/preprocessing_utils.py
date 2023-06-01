@@ -40,6 +40,26 @@ class DictToObject:
 
 
 def split_dataset(dataset, percentages):
+    """
+        Splits a dataset into subsets based on the provided percentages.
+
+        Args:
+            dataset (ndarray): The dataset to be split, with shape (num_samples, seq_len, num_features).
+            percentages (list): A list of percentages specifying the desired sizes of the subsets. The sum of
+                percentages should be less than or equal to 1.0.
+
+        Returns:
+            tuple: A tuple containing the subsets of the dataset. Each subset is a numpy ndarray with shape
+                (num_subset_samples, seq_len, num_features).
+
+        Example:
+            dataset = numpy.array([...])  # Shape: (1000, 10, 3)
+            percentages = [0.6, 0.3, 0.1]
+            subsets = split_dataset(dataset, percentages)
+            # subsets[0] will contain the first 60% of the dataset
+            # subsets[1] will contain the next 30% of the dataset
+            # subsets[2] will contain the remaining 10% of the dataset
+        """
     subsets = []
     start_idx = 0
     total_samples = dataset.shape[0]
