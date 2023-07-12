@@ -12,7 +12,7 @@ import mlflow
 
 # internal
 from src.configs.config import CFG
-from src.models.lstm_ae_extra import LSTMAutoencoder
+from src.models.lstm_ae import LSTMAutoencoder
 from src.inference.inferrer import Inferrer
 from src.utils.logging_utils import mlflow_config
 
