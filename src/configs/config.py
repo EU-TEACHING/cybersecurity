@@ -40,7 +40,7 @@ CFG = {
         "train_setup": {
             "seq_time_steps": 4,
             "early_stopping_rounds": 5,
-            "tuning": False,
+            "tuning": True,
             "tuning_max_evals": 5,
             "hp_space": "lstm-ae-extra"
         }
