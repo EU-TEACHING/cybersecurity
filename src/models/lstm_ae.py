@@ -72,8 +72,6 @@ class LSTMAutoencoder(BaseModel):
 
         self.threshold = None
         self.mahalanobis_params = None
-        # self.cov = None
-        # self.mean = None
 
         self.with_mlflow = self.config.mlflow_config.enabled
 
@@ -240,7 +238,7 @@ class LSTMAutoencoder(BaseModel):
         # Use normal and anomaly scores to compute the threshold
         self.threshold = compute_threshold(normal_scores, anomaly_scores)
 
-        # TESTING METRICS
+        ### METRICS ###
 
         # Evaluate on normal test (Malhotra: tN)
         rec_error_norm_test_x = get_reconstruction_error(self.model, self.norm_test_x_seq)
@@ -250,8 +248,6 @@ class LSTMAutoencoder(BaseModel):
                                                                    self.threshold,
                                                                    self.seq_time_steps,
                                                                    self.mahalanobis_params)
-
-        # Log metrics to mlflow
         log_mlflow_metrics(n_accuracy, n_precision, n_recall, n_f1, 'train')
 
         # Evaluate on anomalous test (Malhotra: tA)
@@ -262,8 +258,6 @@ class LSTMAutoencoder(BaseModel):
                                                                    self.threshold,
                                                                    self.seq_time_steps,
                                                                    self.mahalanobis_params)
-
-        # Log metrics to mlflow
         log_mlflow_metrics(a_accuracy, a_precision, a_recall, a_f1, 'val')
 
         # Evaluate on verification set (mixed)
@@ -274,15 +268,13 @@ class LSTMAutoencoder(BaseModel):
                                                            self.threshold,
                                                            self.seq_time_steps,
                                                            self.mahalanobis_params)
-
-        # Log metrics to mlflow
         log_mlflow_metrics(accuracy, precision, recall, f1, 'ver')
 
     def _save_transformer(self):
         # Save time steps for creating sequences in transformer
         self.transformer.seq_time_steps = self.seq_time_steps
         # Save Mahalanobis params from train
-        self.transformer.mahalanobis_params = {"mean": self.mean, "cov": self.cov}
+        self.transformer.mahalanobis_params = self.mahalanobis_params
         self.transformer.threshold = self.threshold
         # Save the transformer
         self.transformer_name = "transformer.sav"
