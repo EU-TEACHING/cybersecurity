@@ -11,51 +11,61 @@ def get_reconstruction_error(model, data):
     return model.predict(data) - data
 
 
-def compute_mahalanobis_params(reconstruction_error, normal_data):
-    """Compute the covariance matrix and the mean that are needed to compute the mahalanobis distance.
-    This is done only for the normal data (norm_mahal_x_seq)"""
-    cov = np.cov(reconstruction_error.reshape(-1, normal_data.shape[-1]).T)
-    mean = np.mean(reconstruction_error.reshape(-1, normal_data.shape[-1]), axis=0)
-    mah_params = {"mean": mean, "cov": cov}
-    return mah_params
+def compute_mahalanobis_params(reconstruction_error):
+    """
+    Computes the Mahalanobis parameters (mean and covariance matrix) from the reconstruction error.
+
+    Args:
+        reconstruction_error (np.ndarray): The reconstruction error from the 'v_N1' split.
+            Shape: (num_instances, subsequence_length, num_features).
+
+    Returns:
+        dict: A dictionary containing the Mahalanobis parameters 'mean' and 'cov'.
+
+    """
+    # The purpose of reshaping is to align the data in a format that the np.cov function can process. It treats
+    # each row as an observation and each column as a variable when calculating the covariance matrix. Reshaping the
+    # reconstruction error in this way ensures that each instance's subsequence of feature values is treated as a
+    # separate observation, allowing us to calculate the covariance matrix correctly.
+
+    reshaped_error = reconstruction_error.reshape(-1, reconstruction_error.shape[-1])
+    mean = np.mean(reshaped_error, axis=0)
+    cov = np.cov(reshaped_error, rowvar=False)
+
+    mahalanobis_params = {'mean': mean, 'cov': cov}
+    return mahalanobis_params
 
 
-def compute_mahalanobis_distance(reconstruction_error, time_steps, mah_params):
-    """Compute mahalanobis distance."""
-    # Reshape the reconstruction error from 3D (#sequences, sequence_length, #features)
-    # to 2D (#sequences * sequence_length, #features)
-    reshaped_error = reconstruction_error.reshape(-1, reconstruction_error.shape[-1])  # shape: (seq*timesteps, n_feat)
-    return np.mean(
-        np.array([distance.mahalanobis(mah_params['mean'], reshaped_error[i], mah_params['cov']) for i in
-                  range(len(reshaped_error))]).reshape(-1, time_steps), axis=1)
+def compute_mahalanobis_distance_inv(reconstruction_error, mah_params):
+    """
+    Compute the Mahalanobis distance for each instance in the reconstruction error.
+
+    Args:
+        reconstruction_error (np.ndarray): The reconstruction error.
+            Shape: (num_instances, subsequence_length, num_features).
+        mah_params (dict): A dictionary containing the Mahalanobis parameters.
+            The dictionary should have keys 'mean' and 'cov'.
+
+    Returns:
+        np.ndarray: The Mahalanobis distances for each instance.
+            Shape: (num_instances,).
+
+    """
+    reshaped_error = reconstruction_error.reshape(-1, reconstruction_error.shape[-1])
+    mahalanobis_dist = np.array([
+        distance.mahalanobis(error, mah_params['mean'], np.linalg.inv(mah_params['cov'])) for error in reshaped_error
+    ])
+    mahalanobis_dist = mahalanobis_dist.reshape(reconstruction_error.shape[:-1])
+    mean_mahalanobis_dist = np.mean(mahalanobis_dist, axis=1)
+    return mean_mahalanobis_dist
 
 
-# def compute_mahalanobis_(reconstruction_error, mean, cov, time_steps):
-#     """Compute Mahalanobis distance. GPT"""
-#
-#     # Reshape the reconstruction error from 3D (#sequences, sequence_length, #features) to 2D (#sequences * sequence_length, #features)
-#     reshaped_error = reconstruction_error.reshape(-1, reconstruction_error.shape[-1])
-#
-#     # Compute the Mahalanobis distance
-#     inv_cov = np.linalg.inv(cov)
-#     mahalanobis_dist = []
-#     for i in range(0, reshaped_error.shape[0], time_steps):
-#         error_slice = reshaped_error[i:i + time_steps]
-#         diff = error_slice - mean
-#         dist = np.sqrt(np.sum(np.dot(diff, inv_cov) * diff, axis=1))
-#         mahalanobis_dist.extend(dist)
-#
-#     return np.array(mahalanobis_dist)
+def anomaly_scoring(reconstruction_error, time_steps, mah_params):
+    """Compute anomaly scores, find anomalies and return the anomalous data indices and the threshold."""
+    # rec error same shape with data_seq i.e., (n_seq,timesteps,n_feat)
+    anomaly_scores_inv = compute_mahalanobis_distance_inv(reconstruction_error, mah_params)
+    return anomaly_scores_inv
 
-
-# # Test the compute_mahalanobis function
-# reconstruction_error = np.random.randn(100, 4, 10)  # Example reconstruction error array
-# mean = np.random.randn(10)  # Example mean array
-# cov = np.eye(10)  # Example covariance matrix
-# time_steps = 4  # Example number of time steps
-#
-# distances = compute_mahalanobis(reconstruction_error, mean, cov, time_steps)
-# print(distances)
 
 def evaluate_fbeta(threshold: float, normal_scores: List[float], anomaly_scores: List[float],
                    beta: float = 1.0) -> float:
@@ -119,13 +129,6 @@ def compute_threshold(normal_scores: List[float], anomaly_scores: List[float], n
     threshold = thresholds[max_index]
 
     return threshold
-
-
-def anomaly_scoring(reconstruction_error, time_steps, mah_params):
-    """Compute anomaly scores, find anomalies and return the anomalous data indices and the threshold."""
-    # rec error same shape with data_seq i.e., (n_seq,timesteps,n_feat)
-    anomaly_scores = compute_mahalanobis_distance(reconstruction_error, time_steps, mah_params)  # shape: (n_seq,)
-    return anomaly_scores
 
 
 def get_anomalies(reconstruction_error, data_seq, threshold, time_steps, mah_params):
