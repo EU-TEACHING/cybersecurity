@@ -225,7 +225,7 @@ class LSTMAutoencoder(BaseModel):
 
         # Get the mahalanobis params (mean and cov) from the reconstruction error of normal val-1 (Malhotra: v_N1)
         rec_error_norm_val1_x = get_reconstruction_error(self.model, self.norm_val1_x_seq)
-        self.mahalanobis_params = compute_mahalanobis_params(rec_error_norm_val1_x, self.norm_val1_x_seq)
+        self.mahalanobis_params = compute_mahalanobis_params(rec_error_norm_val1_x)
 
         # Get the threshold from the anomaly scores of normal val-2 (Malhotra: v_N2) and anomalous val (Malhotra: vA)
         rec_error_norm_val2_x = get_reconstruction_error(self.model, self.norm_val2_x_seq)
