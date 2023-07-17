@@ -70,6 +70,8 @@ class LSTMAutoencoder(BaseModel):
         self.model_history = None
         self.model = None
 
+        self.num_thresholds = self.config.train.anomaly_scoring.num_thresholds
+        self.beta = self.config.train.anomaly_scoring.beta
         self.threshold = None
         self.mahalanobis_params = None
 
@@ -236,39 +238,42 @@ class LSTMAutoencoder(BaseModel):
         anomaly_scores = anomaly_scoring(rec_error_anom_val_x, self.seq_time_steps, self.mahalanobis_params)
 
         # Use normal and anomaly scores to compute the threshold
-        self.threshold = compute_threshold(normal_scores, anomaly_scores)
+        self.threshold = compute_threshold(normal_scores, anomaly_scores, self.num_thresholds, self.beta)
 
         ### METRICS ###
 
         # Evaluate on normal test (Malhotra: tN)
         rec_error_norm_test_x = get_reconstruction_error(self.model, self.norm_test_x_seq)
-        n_accuracy, n_precision, n_recall, n_f1 = get_eval_metrics(rec_error_norm_test_x,
-                                                                   self.norm_test_x_seq,
-                                                                   self.norm_test_y_seq,
-                                                                   self.threshold,
-                                                                   self.seq_time_steps,
-                                                                   self.mahalanobis_params)
-        log_mlflow_metrics(n_accuracy, n_precision, n_recall, n_f1, 'train')
+        print("Evaluate on normal training set (tN):")
+        n_accuracy, n_precision, n_recall, n_f1, n_cm = get_eval_metrics(rec_error_norm_test_x,
+                                                                         self.norm_test_x_seq,
+                                                                         self.norm_test_y_seq,
+                                                                         self.threshold,
+                                                                         self.seq_time_steps,
+                                                                         self.mahalanobis_params)
+        log_mlflow_metrics(n_accuracy, n_precision, n_recall, n_f1, n_cm, 'norm')
 
         # Evaluate on anomalous test (Malhotra: tA)
         rec_error_anom_test_x = get_reconstruction_error(self.model, self.anom_test_x_seq)
-        a_accuracy, a_precision, a_recall, a_f1 = get_eval_metrics(rec_error_anom_test_x,
-                                                                   self.anom_test_x_seq,
-                                                                   self.anom_test_y_seq,
-                                                                   self.threshold,
-                                                                   self.seq_time_steps,
-                                                                   self.mahalanobis_params)
-        log_mlflow_metrics(a_accuracy, a_precision, a_recall, a_f1, 'val')
+        print("Evaluate on anomalous validation set (tA):")
+        a_accuracy, a_precision, a_recall, a_f1, a_cm = get_eval_metrics(rec_error_anom_test_x,
+                                                                         self.anom_test_x_seq,
+                                                                         self.anom_test_y_seq,
+                                                                         self.threshold,
+                                                                         self.seq_time_steps,
+                                                                         self.mahalanobis_params)
+        log_mlflow_metrics(a_accuracy, a_precision, a_recall, a_f1, a_cm, 'anom')
 
         # Evaluate on verification set (mixed)
         rec_error_verification_x_seq = get_reconstruction_error(self.model, self.verification_x_seq)
-        accuracy, precision, recall, f1 = get_eval_metrics(rec_error_verification_x_seq,
-                                                           self.verification_x_seq,
-                                                           self.verification_y_seq,
-                                                           self.threshold,
-                                                           self.seq_time_steps,
-                                                           self.mahalanobis_params)
-        log_mlflow_metrics(accuracy, precision, recall, f1, 'ver')
+        print("Evaluate on holdout verification set:")
+        accuracy, precision, recall, f1, cm = get_eval_metrics(rec_error_verification_x_seq,
+                                                               self.verification_x_seq,
+                                                               self.verification_y_seq,
+                                                               self.threshold,
+                                                               self.seq_time_steps,
+                                                               self.mahalanobis_params)
+        log_mlflow_metrics(accuracy, precision, recall, f1, cm, 'ver')
 
     def _save_transformer(self):
         # Save time steps for creating sequences in transformer

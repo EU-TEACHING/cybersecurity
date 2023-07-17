@@ -70,7 +70,8 @@ def anomaly_scoring(reconstruction_error, time_steps, mah_params):
 def evaluate_fbeta(threshold: float, normal_scores: List[float], anomaly_scores: List[float],
                    beta: float = 1.0) -> float:
     """
-    Evaluates the F-beta score for a given threshold in anomaly detection.
+    Evaluates the F-beta score for a given threshold in anomaly detection. When beta is set to 1, it calculates the F1
+    score, which balances precision and recall equally.
 
     Args:
         threshold: The threshold value for classification.
@@ -85,7 +86,6 @@ def evaluate_fbeta(threshold: float, normal_scores: List[float], anomaly_scores:
         None.
 
     """
-
     true_positives = sum(score >= threshold for score in anomaly_scores)
     false_positives = sum(score >= threshold for score in normal_scores)
     false_negatives = sum(score < threshold for score in anomaly_scores)
@@ -102,7 +102,8 @@ def evaluate_fbeta(threshold: float, normal_scores: List[float], anomaly_scores:
     return fbeta
 
 
-def compute_threshold(normal_scores: List[float], anomaly_scores: List[float], num_thresholds: int = 20) -> float:
+def compute_threshold(normal_scores: List[float], anomaly_scores: List[float], num_thresholds: int = 20,
+                      beta: float = 1.0) -> float:
     """
     Computes the optimal threshold for anomaly detection using the given normal and anomaly scores.
 
@@ -110,6 +111,7 @@ def compute_threshold(normal_scores: List[float], anomaly_scores: List[float], n
         normal_scores: List of scores for normal instances.
         anomaly_scores: List of scores for anomaly instances.
         num_thresholds: Number of thresholds to divide the range between the medians. Default is 20.
+        beta: Beta value for controlling the trade-off between precision and recall. Default is 1.0 (F1 score).
 
     Returns:
         The optimal threshold value for anomaly detection.
@@ -117,13 +119,12 @@ def compute_threshold(normal_scores: List[float], anomaly_scores: List[float], n
     Raises:
         None.
     """
-
     lower = np.median(normal_scores)
     upper = np.median(anomaly_scores)
     delta = (upper - lower) / num_thresholds
 
     thresholds = np.arange(lower, upper, delta)
-    fbeta_scores = [evaluate_fbeta(threshold, normal_scores, anomaly_scores) for threshold in thresholds]
+    fbeta_scores = [evaluate_fbeta(threshold, normal_scores, anomaly_scores, beta) for threshold in thresholds]
 
     max_index = np.argmax(fbeta_scores)
     threshold = thresholds[max_index]
@@ -157,15 +158,17 @@ def pred_eval(y_true, y_pred):
     msg = "Accuracy %.2f, Precision %.2f, Recall %.2f, F1 %.2f" % (accuracy, precision, recall, f1)
     print(msg)
 
-    return accuracy, precision, recall, f1
+    return accuracy, precision, recall, f1, cm
 
 
 def get_eval_metrics(reconstruction_error, data_x, data_y, threshold, time_steps, mah_params):
     """Evaluate, i.e., compute the reconstruction error and compute mahalanobis to get the anomaly scores, filter them
      with the threshold and return the anomalous indices."""
     anomalous_data_indices = get_anomalies(reconstruction_error, data_x, threshold, time_steps, mah_params)
+    # Sliding windows, take the first column element from each window until first from the end
+    # Take the whole last window since each element is not included in other windows
     data_y_unseq = np.concatenate([data_y[:-1, 0], data_y[-1, :]])
     data_y_unseq = pd.DataFrame(data_y_unseq.reshape(-1, 1))
     y_pred = create_dataframe_of_predicted_labels(data_y_unseq, anomalous_data_indices)
-    accuracy, precision, recall, f1 = pred_eval(data_y_unseq[time_steps: -time_steps], y_pred[time_steps: -time_steps])
-    return accuracy, precision, recall, f1
+    accuracy, precision, recall, f1, cm = pred_eval(data_y_unseq[time_steps: -time_steps], y_pred[time_steps: -time_steps])
+    return accuracy, precision, recall, f1, cm

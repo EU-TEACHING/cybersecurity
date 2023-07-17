@@ -4,6 +4,7 @@ from mlflow_env_vars import mlflow_connect
 
 
 def mlflow_config(mlflow_cfg):
+    #TODO: Try catch
     mlflow_connect()
     experiment_name = mlflow_cfg["experiment_name"]
     experiment_id = retrieve_mlflow_experiment_id(experiment_name, create=True)
@@ -33,8 +34,9 @@ def retrieve_mlflow_experiment_id(name, create=False):
     return experiment_id
 
 
-def log_mlflow_metrics(accuracy, precision, recall, f1, mode):
+def log_mlflow_metrics(accuracy, precision, recall, f1, cm, mode):
     mlflow.log_metric(f'Accuracy_{mode}', accuracy)
     mlflow.log_metric(f'Precision_{mode}', precision)
     mlflow.log_metric(f'Recall_{mode}', recall)
     mlflow.log_metric(f'F1_{mode}', f1)
+    mlflow.log_metric(f'CM_{mode}', cm)

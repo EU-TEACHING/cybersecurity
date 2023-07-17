@@ -41,6 +41,10 @@ CFG = {
             "tuning": False,
             "tuning_max_evals": 5,
             "hp_space": "lstm-ae-extra"
+        },
+        "anomaly_scoring": {
+            "beta": 1.0,
+            "num_thresholds": 20
         }
     },
     "model": {
@@ -48,7 +52,7 @@ CFG = {
         "storage_path": "local_model_storage"
     },
     "mlflow_config": {
-        "enabled": True,
+        "enabled": False,
         "experiment_name": "teaching-ADLM-v5",
     },
     "inference": {
