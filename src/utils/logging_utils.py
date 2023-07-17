@@ -4,8 +4,11 @@ from mlflow_env_vars import mlflow_connect
 
 
 def mlflow_config(mlflow_cfg):
-    #TODO: Try catch
-    mlflow_connect()
+    try:
+        mlflow_connect()
+    except Exception as e:
+        print("Failed to connect to MLflow:", str(e))
+        return None
     experiment_name = mlflow_cfg["experiment_name"]
     experiment_id = retrieve_mlflow_experiment_id(experiment_name, create=True)
 
