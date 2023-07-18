@@ -309,7 +309,6 @@ class LSTMAutoencoder(BaseModel):
         """Log training results"""
 
         # ToDo: same log for tune or without tune. the hyperparams are modified directly in the respective class attributes
-        # ToDo: log tn, fp, fn, tp as metrics
         # Log parameters: training parameters
         mlflow.log_params({
             "train_shape": self.norm_train_x_seq.shape,
