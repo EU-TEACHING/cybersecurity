@@ -9,7 +9,7 @@ import logging
 
 # external
 import mlflow
-
+import torch
 # internal
 from src.configs.config import CFG
 from src.models.lstm_ae import LSTMAutoencoder
