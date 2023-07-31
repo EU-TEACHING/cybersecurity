@@ -215,7 +215,8 @@ class LSTMAutoencoder(BaseModel):
     def _train(self, hyperparams):
         optimizer = keras.optimizers.Adam(learning_rate=hyperparams.learning_rate)
         self.model.compile(loss='mse', optimizer=optimizer)
-        es = EarlyStopping(monitor='val_loss', patience=self.config.train.train_setup.early_stopping_rounds, mode='min', verbose=1, restore_best_weights=True)
+        es = EarlyStopping(monitor='val_loss', patience=self.config.train.train_setup.early_stopping_rounds, mode='min',
+                           verbose=1, restore_best_weights=True)
         self.model_history = self.model.fit(self.norm_train_x_seq, self.norm_train_x_seq,
                                             batch_size=hyperparams.batch_size,
                                             epochs=hyperparams.epochs, verbose=1,
@@ -310,13 +311,8 @@ class LSTMAutoencoder(BaseModel):
         # ToDo: same log for tune or without tune. the hyperparams are modified directly in the respective class attributes
         # Log parameters: training parameters
         mlflow.log_params({
-            "train_shape": self.norm_train_x_seq.shape,
-
             "seq_time_steps": self.seq_time_steps,
-            "early_stopping_rounds": self.config.train.train_setup.early_stopping_rounds,
             "tuning": self.train_setup.tuning,
-
-            # config.train.hyperparams
             "encoder_layers": self.hyperparams.encoder_layers,
             "decoder_layers": self.hyperparams.decoder_layers,
             "encoder_units": self.hyperparams.encoder_units,
@@ -324,7 +320,7 @@ class LSTMAutoencoder(BaseModel):
             "learning_rate": self.hyperparams.learning_rate,
             "dropout_rate": self.hyperparams.dropout_rate,
             "batch_size": self.hyperparams.batch_size,
-            "epochs": self.hyperparams.epochs,
+            "final_round": len(self.model_history.history['val_loss']) - self.config.train.train_setup.early_stopping_rounds,
             "activation": self.hyperparams.activation,
             "regularization": self.hyperparams.regularization
         })
