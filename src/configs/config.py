@@ -30,8 +30,8 @@ CFG = {
             "decoder_units": (50, 100),
             "learning_rate": 0.0032265,
             "dropout_rate": 0.2,
-            "batch_size": 25,
-            "epochs": 5,
+            "batch_size": 32,
+            "epochs": 200,
             "activation": "tanh",
             "regularization": None
         },
@@ -39,7 +39,7 @@ CFG = {
             "seq_time_steps": 4,
             "early_stopping_rounds": 5,
             "tuning": False,
-            "tuning_max_evals": 5,
+            "tuning_max_evals": 500,
             "hp_space": "lstm-ae-extra"
         },
         "anomaly_scoring": {
@@ -49,7 +49,7 @@ CFG = {
     },
     "model": {
         "model_name": "LSTM-AE",
-        "storage_path": "local_model_storage"
+        "artifact_storage_path": "local_artifacts"
     },
     "mlflow_config": {
         "enabled": True,

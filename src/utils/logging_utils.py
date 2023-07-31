@@ -1,4 +1,5 @@
 import mlflow
+import numpy as np
 from mlflow.tracking import MlflowClient
 from mlflow_env_vars import mlflow_connect
 
@@ -37,9 +38,40 @@ def retrieve_mlflow_experiment_id(name, create=False):
     return experiment_id
 
 
-def log_mlflow_metrics(accuracy, precision, recall, f1, cm, mode):
+def log_mlflow_metrics(storage, accuracy, precision, recall, f1, conf_matrix, mode):
     mlflow.log_metric(f'Accuracy_{mode}', accuracy)
     mlflow.log_metric(f'Precision_{mode}', precision)
     mlflow.log_metric(f'Recall_{mode}', recall)
     mlflow.log_metric(f'F1_{mode}', f1)
-    mlflow.log_metric(f'CM_{mode}', cm)
+
+    write_confusion_matrix_to_md(conf_matrix, f'{storage}/confusion_matrix_{mode}.md')
+    # Log the entire confusion matrix as a single artifact
+    mlflow.log_artifact(f'{storage}/confusion_matrix_{mode}.md')
+
+    # # Flatten the confusion matrix
+    # flattened_conf_matrix = conf_matrix.flatten()
+    #
+    # # Log the individual elements of the confusion matrix as metrics
+    # mlflow.log_metric(f"TN_{mode}", flattened_conf_matrix[0])
+    # mlflow.log_metric(f"FP_{mode}", flattened_conf_matrix[1])
+    # mlflow.log_metric(f"FN_{mode}", flattened_conf_matrix[2])
+    # mlflow.log_metric(f"TP_{mode}", flattened_conf_matrix[3])
+
+
+def write_confusion_matrix_to_md(conf_matrix, md_file):
+    # Open the .md file in write mode
+    with open(md_file, 'w') as file:
+        if conf_matrix.shape == (1, 1):
+            # Handle the case of a single class (TP or TN)
+            file.write(f"|       | {conf_matrix[0, 0]} |\n")
+            file.write(f"|-------|-------|\n")
+            file.write(f"| True 0| {conf_matrix[0, 0]} |\n")
+        else:
+            # Write the Markdown table header
+            file.write("|       | Predicted 0 | Predicted 1 |\n")
+            file.write("|-------|-------------|-------------|\n")
+
+            # Write the table rows with confusion matrix values
+            for i in range(conf_matrix.shape[0]):
+                file.write(f"| True {i} | {conf_matrix[i, 0]}        | {conf_matrix[i, 1]}        |\n")
+

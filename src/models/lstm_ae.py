@@ -30,8 +30,8 @@ from numpy.random import seed
 seed(1)
 tensorflow.random.set_seed(2)
 
-# Run from terminal: tensorboard --logdir=./logs
-tensorboard_callback = TensorBoard(log_dir='./logs')
+# Run from terminal: tensorboard --logdir=./tb_logs
+tensorboard_callback = TensorBoard(log_dir='./tb_logs')
 
 
 class LSTMAutoencoder(BaseModel):
@@ -66,7 +66,7 @@ class LSTMAutoencoder(BaseModel):
         self.transformer = None
         self.trials = None
 
-        self.model_storage = self.config.model.storage_path
+        self.local_artifact_storage = self.config.model.artifact_storage_path
         self.model_history = None
         self.model = None
 
@@ -215,7 +215,7 @@ class LSTMAutoencoder(BaseModel):
     def _train(self, hyperparams):
         optimizer = keras.optimizers.Adam(learning_rate=hyperparams.learning_rate)
         self.model.compile(loss='mse', optimizer=optimizer)
-        es = EarlyStopping(monitor='val_loss', patience=10, mode='min', verbose=1, restore_best_weights=True)
+        es = EarlyStopping(monitor='val_loss', patience=self.config.train.train_setup.early_stopping_rounds, mode='min', verbose=1, restore_best_weights=True)
         self.model_history = self.model.fit(self.norm_train_x_seq, self.norm_train_x_seq,
                                             batch_size=hyperparams.batch_size,
                                             epochs=hyperparams.epochs, verbose=1,
@@ -251,7 +251,7 @@ class LSTMAutoencoder(BaseModel):
                                                                          self.threshold,
                                                                          self.seq_time_steps,
                                                                          self.mahalanobis_params)
-        log_mlflow_metrics(n_accuracy, n_precision, n_recall, n_f1, n_cm, 'norm')
+        log_mlflow_metrics(self.local_artifact_storage, n_accuracy, n_precision, n_recall, n_f1, n_cm, 'norm')
 
         # Evaluate on anomalous test (Malhotra: tA)
         rec_error_anom_test_x = get_reconstruction_error(self.model, self.anom_test_x_seq)
@@ -262,7 +262,7 @@ class LSTMAutoencoder(BaseModel):
                                                                          self.threshold,
                                                                          self.seq_time_steps,
                                                                          self.mahalanobis_params)
-        log_mlflow_metrics(a_accuracy, a_precision, a_recall, a_f1, a_cm, 'anom')
+        log_mlflow_metrics(self.local_artifact_storage, a_accuracy, a_precision, a_recall, a_f1, a_cm, 'anom')
 
         # Evaluate on verification set (mixed)
         rec_error_verification_x_seq = get_reconstruction_error(self.model, self.verification_x_seq)
@@ -273,7 +273,7 @@ class LSTMAutoencoder(BaseModel):
                                                                self.threshold,
                                                                self.seq_time_steps,
                                                                self.mahalanobis_params)
-        log_mlflow_metrics(accuracy, precision, recall, f1, cm, 'ver')
+        log_mlflow_metrics(self.local_artifact_storage, accuracy, precision, recall, f1, cm, 'ver')
 
     def _save_transformer(self):
         # Save time steps for creating sequences in transformer
@@ -282,7 +282,7 @@ class LSTMAutoencoder(BaseModel):
         self.transformer.mahalanobis_params = self.mahalanobis_params
         self.transformer.threshold = self.threshold
         # Save the transformer
-        self.transformer_path = os.path.join(self.model_storage, "transformer.sav")
+        self.transformer_path = os.path.join(self.local_artifact_storage, "transformer.sav")
         joblib.dump(self.transformer, self.transformer_path)
 
     def _save_model(self):
@@ -299,7 +299,7 @@ class LSTMAutoencoder(BaseModel):
                 print("Model saved successfully.")
             else:
                 # Fallback mechanism if MLflow is not available
-                self.model.save(os.path.join(self.model_storage, self.config.model.model_name))
+                self.model.save(os.path.join(self.local_artifact_storage, self.config.model.model_name))
                 print("Model saved successfully.")
         except Exception as e:
             print("An error occurred while saving the model:", str(e))
