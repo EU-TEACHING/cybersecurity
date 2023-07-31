@@ -282,8 +282,7 @@ class LSTMAutoencoder(BaseModel):
         self.transformer.mahalanobis_params = self.mahalanobis_params
         self.transformer.threshold = self.threshold
         # Save the transformer
-        self.transformer_name = "transformer.sav"
-        self.transformer_path = os.path.join(self.model_storage, self.transformer_name)
+        self.transformer_path = os.path.join(self.model_storage, "transformer.sav")
         joblib.dump(self.transformer, self.transformer_path)
 
     def _save_model(self):

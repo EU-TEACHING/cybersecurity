@@ -15,17 +15,6 @@ model_spaces = {
         'batch_size': scope.int(hp.quniform('batch_size', 16, 128, 16)),
         'epochs': scope.int(hp.quniform('epochs', 100, 300, 50))
     },
-    # "lstm-ae-extra": {
-    #     'learning_rate': hp.uniform('learning_rate', 0.0001, 0.01),
-    #     'units': scope.int(hp.quniform('units', 50, 150, 10)),
-    #     'batch_size': scope.int(hp.quniform('batch_size', 16, 128, 16)),
-    #     'epochs': scope.int(hp.quniform('epochs', 100, 300, 50)),
-    #     'num_layers': scope.int(hp.quniform('num_layers', 1, 3, 1)),
-    #     'dropout_rate': hp.uniform('dropout_rate', 0.0, 0.5),
-    #     'activation': hp.choice('activation', ['relu', 'tanh']),
-    #     'regularization': hp.choice('regularization', [None, 'l1', 'l2'])
-    # },
-
     "lstm-ae-extra": {
         'learning_rate': hp.uniform('learning_rate', 0.0001, 0.01),
         'encoder_layers': scope.int(hp.quniform('encoder_layers', 1, 2, 1)),

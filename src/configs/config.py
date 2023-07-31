@@ -52,8 +52,8 @@ CFG = {
         "storage_path": "local_model_storage"
     },
     "mlflow_config": {
-        "enabled": False,
-        "experiment_name": "teaching-ADLM-v5",
+        "enabled": True,
+        "experiment_name": "teaching-ADLM-v6",
     },
     "inference": {
         "data_path": "data/verification/UNSW-NB15_1.csv",
