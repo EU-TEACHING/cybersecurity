@@ -91,5 +91,7 @@ def write_confusion_matrix_to_md(conf_matrix, md_file):
 def check_gpu_usage():
     if tf.test.gpu_device_name():
         print('GPU is available and TensorFlow is using GPU.')
+        return 'GPU'
     else:
         print('GPU is not available. TensorFlow is using CPU.')
+        return 'CPU'

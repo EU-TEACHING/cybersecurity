@@ -40,6 +40,7 @@ class LSTMAutoencoder(BaseModel):
     def __init__(self, config):
         super().__init__(config)
 
+        self.config.mem = config['mem']
         self.data_types = self.config.data.data_types
         self.n_rows = self.config.data.n_rows
         self.ground_truth_cols = self.config.data.ground_truth_cols
@@ -311,6 +312,7 @@ class LSTMAutoencoder(BaseModel):
         # ToDo: same log for tune or without tune. the hyperparams are modified directly in the respective class attributes
         # Log parameters: training parameters
         mlflow.log_params({
+            "mem": self.config.mem,
             "seq_time_steps": self.seq_time_steps,
             "tuning": self.train_setup.tuning,
             "encoder_layers": self.hyperparams.encoder_layers,

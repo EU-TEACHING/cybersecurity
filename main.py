@@ -23,8 +23,6 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-check_gpu_usage()
-
 
 def run_training():
     """Builds model, loads data, trains and evaluates"""
@@ -68,6 +66,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     exec_mode = args.exec
+
+    CFG['mem'] = check_gpu_usage()
 
     if exec_mode == 'train':
         run_training()
