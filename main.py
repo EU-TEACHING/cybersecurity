@@ -14,7 +14,7 @@ import mlflow
 from src.configs.config import CFG
 from src.models.lstm_ae import LSTMAutoencoder
 from src.inference.inferrer import Inferrer
-from src.utils.logging_utils import mlflow_config
+from src.utils.logging_utils import connect_to_mlflow
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def run_training():
     with_mlflow = CFG["mlflow_config"]["enabled"]
 
     if with_mlflow:
-        mlflow_run = mlflow_config(CFG["mlflow_config"])
+        mlflow_run = connect_to_mlflow(CFG["mlflow_config"])
 
     model = LSTMAutoencoder(CFG)
     model.run_train()

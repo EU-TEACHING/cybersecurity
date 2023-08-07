@@ -1,15 +1,26 @@
+import os
 import mlflow
-import numpy as np
 from mlflow.tracking import MlflowClient
-from mlflow_env_vars import mlflow_connect
+from dotenv import load_dotenv
 
 
-def mlflow_config(mlflow_cfg):
-    try:
-        mlflow_connect()
-    except Exception as e:
-        print("Failed to connect to MLflow:", str(e))
-        return None
+def connect_to_mlflow(mlflow_cfg):
+    # Load environment variables from .env file
+    load_dotenv()
+
+    mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+    mlflow_s3_endpoint_url = os.getenv("MLFLOW_S3_ENDPOINT_URL")
+    aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+    if mlflow_tracking_uri:
+        mlflow.set_tracking_uri(mlflow_tracking_uri)
+
+    if mlflow_s3_endpoint_url and aws_access_key_id and aws_secret_access_key:
+        os.environ['MLFLOW_S3_ENDPOINT_URL'] = mlflow_s3_endpoint_url
+        os.environ["AWS_ACCESS_KEY_ID"] = aws_access_key_id
+        os.environ["AWS_SECRET_ACCESS_KEY"] = aws_secret_access_key
+
     experiment_name = mlflow_cfg["experiment_name"]
     experiment_id = retrieve_mlflow_experiment_id(experiment_name, create=True)
 
@@ -74,4 +85,3 @@ def write_confusion_matrix_to_md(conf_matrix, md_file):
             # Write the table rows with confusion matrix values
             for i in range(conf_matrix.shape[0]):
                 file.write(f"| True {i} | {conf_matrix[i, 0]}        | {conf_matrix[i, 1]}        |\n")
-
