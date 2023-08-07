@@ -31,7 +31,7 @@ CFG = {
             "learning_rate": 0.0032265,
             "dropout_rate": 0.2,
             "batch_size": 32,
-            "epochs": 2,
+            "epochs": 200,
             "activation": "tanh",
             "regularization": None
         },
