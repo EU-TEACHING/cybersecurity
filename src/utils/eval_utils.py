@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance
@@ -122,6 +124,18 @@ def compute_threshold(normal_scores: List[float], anomaly_scores: List[float], n
     lower = np.median(normal_scores)
     upper = np.median(anomaly_scores)
     delta = (upper - lower) / num_thresholds
+
+    if lower >= upper:
+        raise ValueError("Invalid input: lower median should be less than upper median.")
+
+    # Calculate delta, ensuring it's not too small
+    MIN_DELTA = 1e-6
+    delta = max((upper - lower) / num_thresholds, MIN_DELTA)
+
+    # Debugging information
+    logging.debug("Lower:", lower)
+    logging.debug("Upper:", upper)
+    logging.debug("Delta:", delta)
 
     thresholds = np.arange(lower, upper, delta)
     fbeta_scores = [evaluate_fbeta(threshold, normal_scores, anomaly_scores, beta) for threshold in thresholds]
