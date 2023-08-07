@@ -1,6 +1,7 @@
 import os
 import mlflow
 from mlflow.tracking import MlflowClient
+import tensorflow as tf
 from dotenv import load_dotenv
 
 
@@ -85,3 +86,10 @@ def write_confusion_matrix_to_md(conf_matrix, md_file):
             # Write the table rows with confusion matrix values
             for i in range(conf_matrix.shape[0]):
                 file.write(f"| True {i} | {conf_matrix[i, 0]}        | {conf_matrix[i, 1]}        |\n")
+
+
+def check_gpu_usage():
+    if tf.test.gpu_device_name():
+        print('GPU is available and TensorFlow is using GPU.')
+    else:
+        print('GPU is not available. TensorFlow is using CPU.')

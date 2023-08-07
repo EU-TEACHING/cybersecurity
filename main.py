@@ -14,7 +14,7 @@ import mlflow
 from src.configs.config import CFG
 from src.models.lstm_ae import LSTMAutoencoder
 from src.inference.inferrer import Inferrer
-from src.utils.logging_utils import connect_to_mlflow
+from src.utils.logging_utils import connect_to_mlflow, check_gpu_usage
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 import warnings
 
 warnings.filterwarnings('ignore')
+
+check_gpu_usage()
 
 
 def run_training():
