@@ -38,3 +38,15 @@ Run from the root directory with:
 
 
     python main.py -e 'infer'
+
+
+### Dependencies
+
+###### Environment variables
+A .env file is required at the root level. It must contain the following info:
+```yaml
+MLFLOW_TRACKING_URI=<mlflow-host:port>
+MLFLOW_S3_ENDPOINT_URL=<minio/s3-host:port>
+AWS_ACCESS_KEY_ID=<minio/s3-user>
+AWS_SECRET_ACCESS_KEY=<minio/s3-pass>
+```

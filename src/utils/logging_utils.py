@@ -56,6 +56,9 @@ def log_mlflow_metrics(storage, accuracy, precision, recall, f1, conf_matrix, mo
     mlflow.log_metric(f'Recall_{mode}', recall)
     mlflow.log_metric(f'F1_{mode}', f1)
 
+    if not os.path.exists(storage):
+        os.makedirs(storage)
+
     write_confusion_matrix_to_md(conf_matrix, f'{storage}/confusion_matrix_{mode}.md')
     # Log the entire confusion matrix as a single artifact
     mlflow.log_artifact(f'{storage}/confusion_matrix_{mode}.md')
