@@ -129,7 +129,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# MLflow envs
-mlflow_env_vars.py
+# tensorboard logs
+tb_logs/
 
-local_model_storage/
+# ml config
+src/configs/config.py
