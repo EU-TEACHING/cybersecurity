@@ -132,5 +132,3 @@ dmypy.json
 # tensorboard logs
 tb_logs/
 
-# ml config
-src/configs/config.py
